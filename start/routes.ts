@@ -28,12 +28,14 @@ Route.group(() => {
   Route.post('register', 'UsersController.register');
   Route.post('login', 'UsersController.login');
   Route.get('confirm/:token', 'UsersController.confirmToken');
+  Route.post('forgotPassword', 'UsersController.forgotPassword');
+  Route.post('resetPassword/:resetCode', 'UsersController.resetPassword');
 }).prefix('api');
 
-//Logout
 Route.group(() => {
   Route.get('loggout', 'UsersController.loggout');
   Route.get('myData', 'UsersController.getMyData');
+  Route.post('updatePassword', 'UsersController.updatePassword');
 })
   .prefix('api')
   .middleware('auth:api');

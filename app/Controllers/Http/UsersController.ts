@@ -69,11 +69,64 @@ export default class UsersController {
     return userService.login(email, password, auth);
   }
 
+  //Loggout
   public async loggout({ auth }: HttpContextContract) {
     return await auth.logout();
   }
 
+  //Get user data
   public async getMyData({ auth }: HttpContextContract) {
     return await auth.authenticate();
+  }
+
+  //Update user password
+  public async updatePassword({ request, auth }: HttpContextContract) {
+    const userService = new UserService();
+
+    const user = await auth.authenticate();
+
+    const newPassword = await RequestValidationService.validateString(
+      request,
+      'newPassword',
+      [rules.minLength(5)]
+    );
+
+    return userService.updatePassword(user, auth, newPassword);
+  }
+
+  //Generates the reset code for Forgotten password
+  public async forgotPassword({ request }: HttpContextContract) {
+    const userService = new UserService();
+
+    const email = await RequestValidationService.validateEmail(
+      request,
+      'email'
+    );
+
+    return userService.forgotPassword(email);
+  }
+
+  //Reset password using the reset code
+  public async resetPassword({ params, request, auth }: HttpContextContract) {
+    const userService = new UserService();
+
+    const newPassword = await RequestValidationService.validateString(
+      request,
+      'newPassword',
+      [rules.minLength(5)]
+    );
+
+    const user = await userService.validateResetPasswordToken(params.resetCode);
+    if (user) {
+      const userUpdated = await userService.updatePassword(
+        user,
+        auth,
+        newPassword
+      );
+      if (userUpdated) {
+        await userService.destroyResetToken(params.resetCode);
+        return userUpdated;
+      }
+    }
   }
 }
