@@ -21,4 +21,16 @@ export abstract class RequestValidationService {
     const payload = await request.validate({ schema: authSchema });
     return payload[field];
   }
+
+  public static async validateNumber(
+    request: RequestContract,
+    field: string,
+    rules: Rule[]
+  ) {
+    const authSchema = schema.create({
+      [field]: schema.number(rules),
+    });
+    const payload = await request.validate({ schema: authSchema });
+    return payload[field];
+  }
 }

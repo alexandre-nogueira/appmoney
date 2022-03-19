@@ -24,18 +24,33 @@ Route.get('/', async () => {
   return { hello: 'world' };
 });
 
+//User - no token
 Route.group(() => {
   Route.post('register', 'UsersController.register');
   Route.post('login', 'UsersController.login');
   Route.get('confirm/:token', 'UsersController.confirmToken');
   Route.post('forgotPassword', 'UsersController.forgotPassword');
   Route.post('resetPassword/:resetCode', 'UsersController.resetPassword');
+  Route.post('recoverUser', 'UsersController.recoverUser');
+  Route.post(
+    'confirmRecoverToken/:token',
+    'UsersController.confirmRecoverToken'
+  );
 }).prefix('api');
 
+//User - token needded
 Route.group(() => {
   Route.get('loggout', 'UsersController.loggout');
   Route.get('myData', 'UsersController.getMyData');
   Route.post('updatePassword', 'UsersController.updatePassword');
+  Route.delete('deleteUser', 'UsersController.delete');
 })
   .prefix('api')
+  .middleware('auth:api');
+
+//Family
+Route.group(() => {
+  Route.patch('edit', 'FamiliesController.edit');
+})
+  .prefix('family')
   .middleware('auth:api');

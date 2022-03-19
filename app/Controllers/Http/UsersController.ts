@@ -15,13 +15,13 @@ export default class UsersController {
     user.firstName = await RequestValidationService.validateString(
       request,
       'first_name',
-      [rules.minLength(2)]
+      [rules.minLength(2), rules.maxLength(120)]
     );
 
     user.lastName = await RequestValidationService.validateString(
       request,
       'last_name',
-      [rules.minLength(2)]
+      [rules.minLength(2), rules.maxLength(120)]
     );
 
     user.password = await RequestValidationService.validateString(
@@ -29,6 +29,20 @@ export default class UsersController {
       'password',
       [rules.minLength(5)]
     );
+
+    user.familyId = await RequestValidationService.validateNumber(
+      request,
+      'familyId',
+      []
+    );
+
+    if (user.familyId !== 0) {
+      user.familyId = await RequestValidationService.validateNumber(
+        request,
+        'familyId',
+        [rules.exists({ table: 'families', column: 'id' })]
+      );
+    }
 
     const registeredUserData = await userService.register(user, auth);
     if (registeredUserData) {
@@ -128,5 +142,51 @@ export default class UsersController {
         return userUpdated;
       }
     }
+  }
+
+  public async recoverUser({ request, response }: HttpContextContract) {
+    const userService = new UserService();
+    const email = await RequestValidationService.validateEmail(
+      request,
+      'email'
+    );
+    let user = await userService.getInactiveUser(email);
+    await userService.generateRecoverToken(user);
+
+    await userService.sendRecoverUserEmail(email, user.rememberMeToken);
+
+    response.status(200);
+    return { message: `Recover email send to ${user.email}` };
+  }
+
+  public async confirmRecoverToken({
+    request,
+    params,
+    response,
+  }: HttpContextContract) {
+    const newPassword = await RequestValidationService.validateString(
+      request,
+      'newPassword',
+      [rules.minLength(5)]
+    );
+    if (params.token) {
+      const userService = new UserService();
+
+      const user = await userService.validateRestoreUserToken(params.token);
+
+      user.password = newPassword;
+      await userService.reactivateUser(user);
+
+      response.status(200);
+      return { message: `User ${user.email} recovered` };
+    }
+  }
+
+  public async delete({ response, auth }: HttpContextContract) {
+    const user = await auth.authenticate();
+    const userService = new UserService();
+    await userService.inactivateUser(user);
+    response.status(200);
+    return { message: `User ${user.email} is now inactive` };
   }
 }

@@ -1,4 +1,4 @@
 export enum ResetTokenStatus {
-  NEW,
-  USED,
+  NEW = 'NEW',
+  USED = 'USED',
 }

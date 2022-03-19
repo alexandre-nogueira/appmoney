@@ -6,9 +6,12 @@ import {
   BaseModel,
   hasMany,
   HasMany,
+  belongsTo,
+  BelongsTo,
 } from '@ioc:Adonis/Lucid/Orm';
 import { UserStatus } from 'App/types/UserStatus';
 import ResetPasswordToken from './ResetPasswordToken';
+import Family from './Family';
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -33,7 +36,12 @@ export default class User extends BaseModel {
   public confirmationCode: string;
 
   @column()
-  public rememberMeToken?: string;
+  public rememberMeToken: string;
+
+  @column()
+  public familyId: number;
+  @belongsTo(() => Family)
+  public family: BelongsTo<typeof Family>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
