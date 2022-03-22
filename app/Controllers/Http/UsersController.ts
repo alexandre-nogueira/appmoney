@@ -47,14 +47,16 @@ export default class UsersController {
     const registeredUserData = await userService.register(user, auth);
     if (registeredUserData) {
       await userService.sendConfirmationEmail(
-        registeredUserData.user.email,
+        registeredUserData.email,
         registeredUserData.confirmationCode
       );
       response.status(200);
-      return registeredUserData.user;
+      registeredUserData.confirmationCode = '';
+      return registeredUserData;
     }
   }
 
+  //Confirm user registration token
   public async confirmToken({ params, response }: HttpContextContract) {
     if (params.token) {
       const userService = new UserService();
@@ -88,6 +90,27 @@ export default class UsersController {
     return await auth.logout();
   }
 
+  //Edit some user data
+  public async edit({ auth, request }: HttpContextContract) {
+    const userService = new UserService();
+
+    let currentUser = await auth.authenticate();
+
+    const firstName = await RequestValidationService.validateString(
+      request,
+      'first_name',
+      [rules.minLength(2), rules.maxLength(120)]
+    );
+
+    const lastName = await RequestValidationService.validateString(
+      request,
+      'last_name',
+      [rules.minLength(2), rules.maxLength(120)]
+    );
+
+    return await userService.edit(currentUser, firstName, lastName);
+  }
+
   //Get user data
   public async getMyData({ auth }: HttpContextContract) {
     return await auth.authenticate();
@@ -105,7 +128,8 @@ export default class UsersController {
       [rules.minLength(5)]
     );
 
-    return userService.updatePassword(user, auth, newPassword);
+    const tokenData = await userService.updatePassword(user, auth, newPassword);
+    return { user: tokenData.user, token: tokenData.token };
   }
 
   //Generates the reset code for Forgotten password
@@ -144,6 +168,7 @@ export default class UsersController {
     }
   }
 
+  //Recover inactivated user
   public async recoverUser({ request, response }: HttpContextContract) {
     const userService = new UserService();
     const email = await RequestValidationService.validateEmail(
@@ -159,6 +184,7 @@ export default class UsersController {
     return { message: `Recover email send to ${user.email}` };
   }
 
+  //Confirm token to reactivate userr
   public async confirmRecoverToken({
     request,
     params,
@@ -182,6 +208,7 @@ export default class UsersController {
     }
   }
 
+  //Set user as inactive
   public async delete({ response, auth }: HttpContextContract) {
     const user = await auth.authenticate();
     const userService = new UserService();

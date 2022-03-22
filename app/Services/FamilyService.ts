@@ -1,13 +1,10 @@
 import { Exception } from '@adonisjs/core/build/standalone';
-import { AuthContract } from '@ioc:Adonis/Addons/Auth';
 import Family from 'App/Models/Family';
 import User from 'App/Models/User';
 
 export class FamilyService {
   //Create new family
-  public async create(description: string) {
-    const family = new Family();
-    family.description = description;
+  public async create(family: Family) {
     return await family.save();
   }
 

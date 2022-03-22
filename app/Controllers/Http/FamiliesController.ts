@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-import { FamilyService } from 'App/Services/FamilyServices';
+import { FamilyService } from 'App/Services/FamilyService';
 import { RequestValidationService } from 'App/Services/RequestValidationService';
 import { rules } from '@ioc:Adonis/Core/Validator';
 

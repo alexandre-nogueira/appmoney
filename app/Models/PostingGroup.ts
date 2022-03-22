@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { BaseModel, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
 import Family from './Family';
 
-export default class AccountCategory extends BaseModel {
+export default class PostingGroup extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 

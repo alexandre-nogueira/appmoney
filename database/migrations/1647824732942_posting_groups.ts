@@ -1,7 +1,7 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema';
 
-export default class AccountCategories extends BaseSchema {
-  protected tableName = 'account_categories';
+export default class PostingGroups extends BaseSchema {
+  protected tableName = 'posting_groups';
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
