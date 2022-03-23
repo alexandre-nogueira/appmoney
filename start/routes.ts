@@ -69,11 +69,22 @@ Route.group(() => {
 
 //Posting group
 Route.group(() => {
-  Route.get('', 'PostingGroupController.getList');
-  Route.get(':id', 'PostingGroupController.getSingle');
-  Route.post('create', 'PostingGroupController.create');
-  Route.patch(':id', 'PostingGroupController.edit');
-  Route.delete(':id', 'PostingGroupController.delete');
+  Route.get('', 'PostingGroupsController.getList');
+  Route.get(':id', 'PostingGroupsController.getSingle');
+  Route.post('create', 'PostingGroupsController.create');
+  Route.patch(':id', 'PostingGroupsController.edit');
+  Route.delete(':id', 'PostingGroupsController.delete');
 })
   .prefix('postingGroup')
+  .middleware('auth:api');
+
+//Posting Category
+Route.group(() => {
+  Route.get('', 'PostingCategoriesController.getList');
+  Route.get(':id', 'PostingCategoriesController.getSingle');
+  Route.post('create', 'PostingCategoriesController.create');
+  Route.patch(':id', 'PostingCategoriesController.edit');
+  Route.delete(':id', 'PostingCategoriesController.delete');
+})
+  .prefix('postingCategory')
   .middleware('auth:api');

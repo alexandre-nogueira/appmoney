@@ -4,7 +4,7 @@ import { PostingGroupService } from 'App/Services/PostingGroupService';
 import { rules } from '@ioc:Adonis/Core/Validator';
 import { RequestValidationService } from 'App/Services/RequestValidationService';
 
-export default class PostingGroupController {
+export default class PostingGroupsController {
   public async getList({ auth }: HttpContextContract) {
     const user = await auth.authenticate();
     const postingGroupService = new PostingGroupService();

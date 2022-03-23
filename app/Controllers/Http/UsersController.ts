@@ -10,7 +10,11 @@ export default class UsersController {
     const userService = new UserService();
     let user: User = new User();
 
-    user.email = await RequestValidationService.validateEmail(request, 'email');
+    user.email = await RequestValidationService.validateString(
+      request,
+      'email',
+      [rules.email(), rules.unique({ table: 'users', column: 'email' })]
+    );
 
     user.firstName = await RequestValidationService.validateString(
       request,
