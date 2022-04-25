@@ -88,3 +88,28 @@ Route.group(() => {
 })
   .prefix('postingCategory')
   .middleware('auth:api');
+
+//Account
+Route.group(() => {
+  Route.get('userAccounts', 'AccountsController.getUserAccounts');
+  Route.get('familyAccounts', 'AccountsController.getFamilyAccounts');
+  Route.get(':id', 'AccountsController.getSingle');
+  Route.post('create', 'AccountsController.create');
+  Route.patch(':id', 'AccountsController.edit');
+  Route.delete(':id', 'AccountsController.delete');
+})
+  .prefix('account')
+  .middleware('auth:api');
+
+//Posting
+Route.group(() => {
+  Route.get('', 'PostingsController.getList');
+  Route.get(':id', 'PostingsController.getSingle');
+  Route.post('create', 'PostingsController.create');
+  Route.patch(':id/pay', 'PostingsController.pay');
+  Route.patch(':id/reversePayment', 'PostingsController.reversePayment');
+  Route.patch(':id', 'PostingsController.edit');
+  Route.delete(':id', 'PostingsController.delete');
+})
+  .prefix('posting')
+  .middleware('auth:api');

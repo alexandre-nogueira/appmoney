@@ -16,12 +16,15 @@ export default class Account extends BaseModel {
   public description: string;
 
   @column()
-  public accountCagegoryId: number;
+  public accountCategoryId: number;
   @hasOne(() => AccountCategory)
   public accountCategory: HasOne<typeof AccountCategory>;
 
   @column()
   public privateAccount: boolean;
+
+  @column()
+  public active: boolean;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

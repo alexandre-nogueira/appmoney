@@ -24,7 +24,7 @@ export class PostingGroupService {
   }
 
   public async get(user: User, id: number) {
-    return this.checkOwnership(user, id);
+    return await this.checkOwnership(user, id);
   }
 
   public async getList(familyId: number) {

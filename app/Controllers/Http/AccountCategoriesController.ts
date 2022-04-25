@@ -1,7 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import AccountCategory from 'App/Models/AccountCategory';
 import { AccountCategoryService } from 'App/Services/AccountCategoryService';
-import { RequestValidationService } from 'App/Services/RequestValidationService';
+import { RequestValidationService } from 'App/Util/RequestValidation';
 import { rules } from '@ioc:Adonis/Core/Validator';
 
 export default class AccountCategoriesController {

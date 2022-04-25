@@ -2,7 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import PostingGroup from 'App/Models/PostingGroup';
 import { PostingGroupService } from 'App/Services/PostingGroupService';
 import { rules } from '@ioc:Adonis/Core/Validator';
-import { RequestValidationService } from 'App/Services/RequestValidationService';
+import { RequestValidationService } from 'App/Util/RequestValidation';
 
 export default class PostingGroupsController {
   public async getList({ auth }: HttpContextContract) {

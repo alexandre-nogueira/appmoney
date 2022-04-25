@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { PostingCategoryService } from 'App/Services/PostingCategoryService';
-import { RequestValidationService } from 'App/Services/RequestValidationService';
+import { RequestValidationService } from 'App/Util/RequestValidation';
 import { rules } from '@ioc:Adonis/Core/Validator';
 import PostingCategory from 'App/Models/PostingCategory';
 export default class PostingCategoriesController {
