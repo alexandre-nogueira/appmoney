@@ -1,6 +1,7 @@
 import { Exception } from '@adonisjs/core/build/standalone';
 import PostingGroup from 'App/Models/PostingGroup';
 import User from 'App/Models/User';
+import { CrudUtilities } from 'App/Util/crudUtilities';
 
 export class PostingGroupService {
   public async create(postingGroup: PostingGroup) {
@@ -9,13 +10,17 @@ export class PostingGroupService {
 
   public async edit(user: User, id: number, description: string) {
     let changed = false;
+    const crudUtilities = new CrudUtilities();
 
     const postingGroup = await this.checkOwnership(user, id);
 
-    if (postingGroup.description !== description) {
-      changed = true;
-      postingGroup.description = description;
-    }
+    changed = crudUtilities.compareField(
+      description,
+      postingGroup,
+      'description',
+      changed
+    );
+
     if (changed === true) {
       return await postingGroup.save();
     } else {

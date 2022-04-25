@@ -9,14 +9,12 @@ export default class FamiliesController {
     const familyService = new FamilyService();
     const user = await auth.authenticate();
 
-    let family = await familyService.get(user.familyId);
-
-    family.description = await RequestValidationService.validateString(
+    const description = await RequestValidationService.validateString(
       request,
       'description',
       [rules.minLength(2), rules.maxLength(150)]
     );
 
-    return await familyService.edit(family);
+    return await familyService.edit(user, description);
   }
 }

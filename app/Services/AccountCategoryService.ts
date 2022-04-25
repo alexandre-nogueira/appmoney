@@ -1,6 +1,7 @@
 import { Exception } from '@adonisjs/core/build/standalone';
 import AccountCategory from 'App/Models/AccountCategory';
 import User from 'App/Models/User';
+import { CrudUtilities } from 'App/Util/crudUtilities';
 
 export class AccountCategoryService {
   public async create(accountCategory: AccountCategory) {
@@ -9,13 +10,17 @@ export class AccountCategoryService {
 
   public async edit(user: User, id: number, description: string) {
     let changed = false;
+    const crudUtilities = new CrudUtilities();
 
     const accountCategory = await this.checkOwnership(user, id);
 
-    if (accountCategory.description !== description) {
-      changed = true;
-      accountCategory.description = description;
-    }
+    changed = crudUtilities.compareField(
+      description,
+      accountCategory,
+      'description',
+      changed
+    );
+
     if (changed === true) {
       return await accountCategory.save();
     } else {
