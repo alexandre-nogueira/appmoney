@@ -18,13 +18,13 @@ export default class UsersController {
 
     user.firstName = await RequestValidationService.validateString(
       request,
-      'first_name',
+      'firstName',
       [rules.minLength(2), rules.maxLength(120)]
     );
 
     user.lastName = await RequestValidationService.validateString(
       request,
-      'last_name',
+      'lastName',
       [rules.minLength(2), rules.maxLength(120)]
     );
 
@@ -86,7 +86,17 @@ export default class UsersController {
       [rules.minLength(5)]
     );
 
-    return userService.login(email, password, auth);
+    const userData = await userService.login(email, password, auth);
+
+    return {
+      APIToken: userData.APIToken,
+      id: userData.user.id,
+      email: userData.user.email,
+      firstName: userData.user.firstName,
+      lastName: userData.user.lastName,
+      familyId: userData.user.familyId,
+      status: userData.user.status,
+    };
   }
 
   //Loggout

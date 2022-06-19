@@ -40,7 +40,7 @@ Route.group(() => {
 
 //User - token needded
 Route.group(() => {
-  Route.get('loggout', 'UsersController.loggout');
+  Route.get('logout', 'UsersController.loggout');
   Route.get('myData', 'UsersController.getMyData');
   Route.post('updatePassword', 'UsersController.updatePassword');
   Route.delete('', 'UsersController.delete');
@@ -106,10 +106,10 @@ Route.group(() => {
   Route.get('', 'PostingsController.getList');
   Route.get(':id', 'PostingsController.getSingle');
   Route.post('create', 'PostingsController.create');
+  Route.post('createMultiple', 'PostingsController.createMultiple');
   Route.patch(':id/pay', 'PostingsController.pay');
   Route.patch(':id/reversePayment', 'PostingsController.reversePayment');
   Route.patch(':id', 'PostingsController.edit');
   Route.delete(':id', 'PostingsController.delete');
-})
-  .prefix('posting')
-  .middleware('auth:api');
+}).prefix('posting');
+//.middleware('auth:api');

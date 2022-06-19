@@ -12,8 +12,9 @@ import {
 import { UserStatus } from 'App/types/UserStatus';
 import ResetPasswordToken from './ResetPasswordToken';
 import Family from './Family';
+import AppBaseModel from './AppBaseModel';
 
-export default class User extends BaseModel {
+export default class User extends AppBaseModel {
   @column({ isPrimary: true })
   public id: number;
 

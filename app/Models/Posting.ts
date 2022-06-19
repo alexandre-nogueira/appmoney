@@ -1,10 +1,11 @@
 import { DateTime } from 'luxon';
-import { BaseModel, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
+import { column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
 import Account from './Account';
 import PostingCategory from './PostingCategory';
 import PostingGroup from './PostingGroup';
+import AppBaseModel from './AppBaseModel';
 
-export default class Posting extends BaseModel {
+export default class Posting extends AppBaseModel {
   @column({ isPrimary: true })
   public id: number;
 

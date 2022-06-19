@@ -5,7 +5,7 @@ export default class AccountsChangePrivateFieldNames extends BaseSchema {
 
   public async up() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.renameColumn('private', 'private_account');
+      table.renameColumn('privateAccount', 'private_account');
     });
   }
 

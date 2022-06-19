@@ -2,8 +2,9 @@ import { DateTime } from 'luxon';
 import { BaseModel, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
 import User from './User';
 import AccountCategory from './AccountCategory';
+import AppBaseModel from './AppBaseModel';
 
-export default class Account extends BaseModel {
+export default class Account extends AppBaseModel {
   @column({ isPrimary: true })
   public id: number;
 

@@ -2,10 +2,76 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import Posting from 'App/Models/Posting';
 import { PostingService } from 'App/Services/PostingService';
 import { RequestValidationService } from 'App/Util/RequestValidation';
-import { rules } from '@ioc:Adonis/Core/Validator';
+import { rules, schema } from '@ioc:Adonis/Core/Validator';
 import { PostingStatus } from 'App/types/PostingStatus';
 
 export default class PostingsController {
+  public async createMultiple({ auth, request }: HttpContextContract) {
+    const user = await auth.authenticate();
+    const postingService = new PostingService();
+    let createdPostings: Posting[] = [];
+    let duplicatedPostings: Posting[] = [];
+
+    const postingSchema = schema.create({
+      postings: schema.array().members(
+        schema.object().members({
+          accountId: schema.number(),
+          postingCategoryId: schema.number([
+            rules.exists({
+              table: 'posting_categories',
+              column: 'id',
+              where: { family_id: user.familyId },
+            }),
+          ]),
+          postingGroupId: schema.number([
+            rules.exists({
+              table: 'posting_groups',
+              column: 'id',
+              where: { family_id: user.familyId },
+            }),
+          ]),
+          status: schema.enum(Object.values(PostingStatus)),
+          description: schema.string({}, [
+            rules.maxLength(255),
+            rules.minLength(1),
+          ]),
+          value: schema.number(),
+          dueDate: schema.date(),
+          paymentDate: schema.date(),
+        })
+      ),
+      ignoreDuplicated: schema.boolean(),
+    });
+
+    const payload = await request.validate({ schema: postingSchema });
+    const postings = payload.postings;
+    for (const requestData of postings) {
+      const posting = new Posting();
+      posting.accountId = requestData.accountId;
+      posting.postingCategoryId = requestData.postingCategoryId;
+      posting.postingGroupId = requestData.postingGroupId;
+      posting.status = requestData.status;
+      posting.description = requestData.description;
+      posting.value = requestData.value;
+      posting.dueDate = requestData.dueDate;
+      posting.paymentDate = requestData.paymentDate;
+      if (payload.ignoreDuplicated === false) {
+        if (await postingService.checkDuplicated(posting)) {
+          duplicatedPostings.push(posting);
+        } else {
+          createdPostings.push(await postingService.create(user, posting));
+        }
+      } else {
+        createdPostings.push(await postingService.create(user, posting));
+      }
+    }
+
+    return {
+      createdPostings: createdPostings,
+      duplicatedPostings: duplicatedPostings,
+    };
+  }
+
   public async create({ auth, request }: HttpContextContract) {
     const postingService = new PostingService();
     const user = await auth.authenticate();
@@ -253,6 +319,24 @@ export default class PostingsController {
       []
     );
 
+    let page = await RequestValidationService.validateOptionalNumber(
+      request,
+      'page',
+      []
+    );
+    if (!page) {
+      page = 1;
+    }
+
+    let perPage = await RequestValidationService.validateOptionalNumber(
+      request,
+      'perPage',
+      []
+    );
+    if (!perPage) {
+      perPage = 20;
+    }
+
     return await postingService.getList(
       user,
       accountIdQuery,
@@ -260,7 +344,9 @@ export default class PostingsController {
       dateTo,
       statusQuery,
       postingCategoryQuery,
-      postingGroupQuery
+      postingGroupQuery,
+      page,
+      perPage
     );
   }
 

@@ -85,7 +85,9 @@ export class PostingService {
     dateTo: DateTime,
     status: string[],
     postingCategory: number[],
-    postingGroup: number[]
+    postingGroup: number[],
+    page: number,
+    perPage: number
   ) {
     let validatedAccounts: number[] = [];
     if (accountId.length === 0) {
@@ -101,22 +103,25 @@ export class PostingService {
       }
     }
     console.log(validatedAccounts);
-    const postings = await Posting.query().where((subQuery) => {
-      subQuery.whereIn('account_id', validatedAccounts).andWhere((query) => {
-        query
-          .where('due_date', '>=', dateFrom.toSQLDate())
-          .andWhere('due_date', '<=', dateTo.toSQLDate());
-      });
-      if (status.length > 0) {
-        subQuery.andWhereIn('status', status);
-      }
-      if (postingCategory.length > 0) {
-        subQuery.andWhereIn('posting_category_id', postingCategory);
-      }
-      if (postingGroup.length > 0) {
-        subQuery.andWhereIn('posting_group_id', postingGroup);
-      }
-    });
+    const postings = await Posting.query()
+      .where((subQuery) => {
+        subQuery.whereIn('account_id', validatedAccounts).andWhere((query) => {
+          query
+            .where('due_date', '>=', dateFrom.toSQLDate())
+            .andWhere('due_date', '<=', dateTo.toSQLDate());
+        });
+
+        if (status.length > 0) {
+          subQuery.andWhereIn('status', status);
+        }
+        if (postingCategory.length > 0) {
+          subQuery.andWhereIn('posting_category_id', postingCategory);
+        }
+        if (postingGroup.length > 0) {
+          subQuery.andWhereIn('posting_group_id', postingGroup);
+        }
+      })
+      .paginate(page, perPage);
     // .toQuery();
     return postings;
   }
@@ -195,5 +200,21 @@ export class PostingService {
     return Object.values(PostingStatus).map((value) => {
       return value.toString();
     });
+  }
+
+  public async checkDuplicated(posting: Posting) {
+    //User 3 fields to check possible duplicated posting
+    // //Due date
+    // //Description
+    // //Value
+    const duplicatedPosting = await Posting.query()
+      .where('due_date', posting.dueDate.toSQLDate())
+      .andWhere('description', posting.description)
+      .andWhere('value', posting.value)
+      .first();
+    if (duplicatedPosting) {
+      return true;
+    }
+    return false;
   }
 }

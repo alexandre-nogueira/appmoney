@@ -38,7 +38,7 @@ export class UserService {
     //Attempt login
     const tokenData = await auth
       .use('api')
-      .attempt(email, password, { expiresIn: '1 days' });
+      .attempt(email, password, { expiresIn: '30 days' });
 
     //Validate User status
     if (tokenData.user.status === UserStatus.PENDING) {

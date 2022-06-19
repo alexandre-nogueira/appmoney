@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon';
 import { BaseModel, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
 import Family from './Family';
+import AppBaseModel from './AppBaseModel';
 
-export default class PostingCategory extends BaseModel {
+export default class PostingCategory extends AppBaseModel {
   @column({ isPrimary: true })
   public id: number;
 
