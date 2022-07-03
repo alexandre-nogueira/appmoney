@@ -3,11 +3,13 @@ import User from 'App/Models/User';
 import { RequestValidationService } from 'App/Util/RequestValidation';
 import { UserService } from 'App/Services/UserService';
 import { rules } from '@ioc:Adonis/Core/Validator';
+import { FamilyService } from 'App/Services/FamilyService';
 
 export default class UsersController {
   //Register new user
   public async register({ response, request, auth }: HttpContextContract) {
     const userService = new UserService();
+    const familyService = new FamilyService();
     let user: User = new User();
 
     user.email = await RequestValidationService.validateString(
@@ -34,18 +36,16 @@ export default class UsersController {
       [rules.minLength(5)]
     );
 
-    user.familyId = await RequestValidationService.validateNumber(
+    const token = await RequestValidationService.validateOptionalString(
       request,
-      'familyId',
+      'token',
       []
     );
-
-    if (user.familyId !== 0) {
-      user.familyId = await RequestValidationService.validateNumber(
-        request,
-        'familyId',
-        [rules.exists({ table: 'families', column: 'id' })]
-      );
+    if (token) {
+      const family = await familyService.getMemberInvitation(token);
+      user.familyId = family?.familyId ?? 0;
+    } else {
+      user.familyId = 0;
     }
 
     const registeredUserData = await userService.register(user, auth);
@@ -54,6 +54,9 @@ export default class UsersController {
         registeredUserData.email,
         registeredUserData.confirmationCode
       );
+      if (token) {
+        await familyService.destroyInvitationToken(token);
+      }
       response.status(200);
       registeredUserData.confirmationCode = '';
       return registeredUserData;
@@ -147,7 +150,7 @@ export default class UsersController {
   }
 
   //Generates the reset code for Forgotten password
-  public async forgotPassword({ request }: HttpContextContract) {
+  public async forgotPassword({ request, response }: HttpContextContract) {
     const userService = new UserService();
 
     const email = await RequestValidationService.validateEmail(
@@ -155,7 +158,26 @@ export default class UsersController {
       'email'
     );
 
-    return userService.forgotPassword(email);
+    const appLinkAdress = await RequestValidationService.validateString(
+      request,
+      'appLinkAdress',
+      []
+    );
+
+    const rptData = await userService.forgotPassword(email);
+    if (rptData) {
+      await userService.sendResetPasswordEmail(
+        email,
+        rptData.resetCode,
+        appLinkAdress
+      );
+    }
+
+    response.status(200);
+    return {
+      message:
+        'Caso você tenha um usuário válido, um email de recuperação de senha foi enviado',
+    };
   }
 
   //Reset password using the reset code
@@ -179,6 +201,21 @@ export default class UsersController {
         await userService.destroyResetToken(params.resetCode);
         return userUpdated;
       }
+    }
+  }
+
+  public async getUserFromRPT({ request }) {
+    const userService = new UserService();
+
+    const rpt = await RequestValidationService.validateString(
+      request,
+      'rpt',
+      []
+    );
+
+    const user = await userService.validateResetPasswordToken(rpt);
+    if (user) {
+      return { email: user.email };
     }
   }
 

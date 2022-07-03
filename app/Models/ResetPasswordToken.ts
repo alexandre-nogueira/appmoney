@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm';
+import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm';
 import User from './User';
-import { ResetTokenStatus } from 'App/types/ResetTokenStatus';
+import { TokenStatus } from 'App/types/TokenStatus';
 import AppBaseModel from './AppBaseModel';
 
 export default class ResetPasswordToken extends AppBaseModel {
@@ -24,5 +24,5 @@ export default class ResetPasswordToken extends AppBaseModel {
   public createdAt: DateTime;
 
   @column()
-  public status: ResetTokenStatus;
+  public status: TokenStatus;
 }

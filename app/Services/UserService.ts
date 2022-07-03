@@ -6,7 +6,7 @@ import { NotificationService } from './notificationService';
 import { TokenService } from './tokenService';
 import ResetPasswordToken from 'App/Models/ResetPasswordToken';
 import { DateTime } from 'luxon';
-import { ResetTokenStatus } from 'App/types/ResetTokenStatus';
+import { TokenStatus } from 'App/types/TokenStatus';
 import { FamilyService } from './FamilyService';
 import Family from 'App/Models/Family';
 
@@ -138,21 +138,19 @@ export class UserService {
       });
       resetPasswordToken.userId = user.id;
       resetPasswordToken.expiresAt = DateTime.now().plus({ hours: 1 });
-      resetPasswordToken.status = ResetTokenStatus.NEW;
+      resetPasswordToken.status = TokenStatus.NEW;
       await resetPasswordToken.save();
       return { email: email, resetCode: resetPasswordToken.token };
-    } else {
-      throw new Exception('User does not exists', 400, 'E_USER_NOT_EXISTS');
     }
+    // else {
+    //   throw new Exception('User does not exists', 400, 'E_USER_NOT_EXISTS');
+    // }
   }
 
   //Validate if the reset password token is valid.
   public async validateResetPasswordToken(token: string) {
     const rpt = await ResetPasswordToken.query().where('token', token).first();
-    if (
-      rpt?.status !== ResetTokenStatus.NEW ||
-      rpt?.expiresAt < DateTime.now()
-    ) {
+    if (rpt?.status !== TokenStatus.NEW || rpt?.expiresAt < DateTime.now()) {
       throw new Exception(
         'Invalid Token',
         400,
@@ -178,7 +176,7 @@ export class UserService {
   public async destroyResetToken(token: string) {
     const rpt = await ResetPasswordToken.query().where('token', token).first();
     if (rpt) {
-      rpt.status = ResetTokenStatus.USED;
+      rpt.status = TokenStatus.USED;
       await rpt.save();
       return true;
     } else {
@@ -220,6 +218,22 @@ export class UserService {
       `<h2>Para recuperar seu usuário,
         <a href=http://127.0.0.1:3333/api/confirmRevocerToken/${confirmationCode}>
         clique aqui</a></h2>`
+    );
+  }
+
+  //Send an email to the new registered user with the confirmation link
+  public async sendResetPasswordEmail(
+    email: string,
+    resetCode: string,
+    appLinkAdress: string
+  ) {
+    const notificationService = new NotificationService();
+    notificationService.sendFakeMail(
+      'App Money Reset Password',
+      email,
+      `<h2>Defina uma nova senha
+        <a href=${appLinkAdress}/${resetCode}>
+        clicando aqui</a></h2>`
     );
   }
 

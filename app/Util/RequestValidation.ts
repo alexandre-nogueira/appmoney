@@ -23,6 +23,18 @@ export abstract class RequestValidationService {
     return payload[field];
   }
 
+  public static async validateOptionalString(
+    request: RequestContract,
+    field: string,
+    rules: Rule[]
+  ) {
+    const authSchema = schema.create({
+      [field]: schema.string.optional({}, rules),
+    });
+    const payload = await request.validate({ schema: authSchema });
+    return payload[field];
+  }
+
   public static async validateNumber(
     request: RequestContract,
     field: string,

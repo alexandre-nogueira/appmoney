@@ -33,10 +33,10 @@ export default class User extends AppBaseModel {
   @column()
   public status: UserStatus;
 
-  @column()
+  @column({ serializeAs: null })
   public confirmationCode: string;
 
-  @column()
+  @column({ serializeAs: null })
   public rememberMeToken: string;
 
   @column()

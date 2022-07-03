@@ -36,6 +36,7 @@ Route.group(() => {
     'confirmRecoverToken/:token',
     'UsersController.confirmRecoverToken'
   );
+  Route.post('getUserFromRPT', 'UsersController.getUserFromRPT');
 }).prefix('user');
 
 //User - token needded
@@ -52,9 +53,22 @@ Route.group(() => {
 //Family
 Route.group(() => {
   Route.patch('', 'FamiliesController.edit');
+  Route.post('inviteMember', 'FamiliesController.inviteMember');
+  Route.get(
+    'getPendingInvitations',
+    'FamiliesController.getPendingInvitations'
+  );
+  Route.get('members', 'FamiliesController.getMembers');
 })
   .prefix('family')
   .middleware('auth:api');
+
+Route.group(() => {
+  Route.get(
+    'getMemberInvitation/:token',
+    'FamiliesController.getMemberInvitation'
+  );
+}).prefix('family');
 
 //Account Category
 Route.group(() => {

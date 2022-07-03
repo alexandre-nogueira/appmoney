@@ -1,5 +1,6 @@
+import FamilyInvitation from 'App/Models/FamilyInvitation';
 import { DateTime } from 'luxon';
-import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm';
+import { column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm';
 import User from './User';
 import AppBaseModel from './AppBaseModel';
 
@@ -18,4 +19,7 @@ export default class Family extends AppBaseModel {
 
   @hasMany(() => User)
   public users: HasMany<typeof User>;
+
+  @hasMany(() => FamilyInvitation)
+  public familyInvitations: HasMany<typeof FamilyInvitation>;
 }
