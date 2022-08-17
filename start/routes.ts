@@ -59,6 +59,8 @@ Route.group(() => {
     'FamiliesController.getPendingInvitations'
   );
   Route.get('members', 'FamiliesController.getMembers');
+  Route.get('pendingInvitations', 'FamiliesController.getPendingInvitations');
+  Route.post('cancelInvitation', 'FamiliesController.cancelInvitation');
 })
   .prefix('family')
   .middleware('auth:api');
@@ -74,7 +76,7 @@ Route.group(() => {
 Route.group(() => {
   Route.get('', 'AccountCategoriesController.getList');
   Route.get(':id', 'AccountCategoriesController.getSingle');
-  Route.post('create', 'AccountCategoriesController.create');
+  Route.post('', 'AccountCategoriesController.create');
   Route.patch(':id', 'AccountCategoriesController.edit');
   Route.delete(':id', 'AccountCategoriesController.delete');
 })

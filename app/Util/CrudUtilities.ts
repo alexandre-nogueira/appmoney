@@ -1,3 +1,4 @@
+import { string } from '@ioc:Adonis/Core/Helpers';
 export class CrudUtilities {
   public compareField(
     newValue: any,
@@ -7,10 +8,18 @@ export class CrudUtilities {
   ) {
     if (newValue !== obj[field]) {
       obj[field] = newValue;
-      console.log('entrei no campo', field, obj[field], newValue);
-      console.log(typeof obj[field], typeof newValue);
       return true;
     }
     return changed;
+  }
+
+  public formatReturn(entity, fields: Array<string>) {
+    let obj = new Object();
+
+    fields.forEach((field) => {
+      obj[field] = entity[field];
+    });
+
+    return obj;
   }
 }

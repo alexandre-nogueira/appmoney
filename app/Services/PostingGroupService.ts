@@ -4,8 +4,14 @@ import User from 'App/Models/User';
 import { CrudUtilities } from 'App/Util/crudUtilities';
 
 export class PostingGroupService {
+  private stdReturn = ['id', 'familyId', 'description'];
+
   public async create(postingGroup: PostingGroup) {
-    return await postingGroup.save();
+    const crudUtilities = new CrudUtilities();
+    return crudUtilities.formatReturn(
+      await postingGroup.save(),
+      this.stdReturn
+    );
   }
 
   public async edit(user: User, id: number, description: string) {
@@ -22,24 +28,35 @@ export class PostingGroupService {
     );
 
     if (changed === true) {
-      return await postingGroup.save();
+      return crudUtilities.formatReturn(
+        await postingGroup.save(),
+        this.stdReturn
+      );
     } else {
       throw new Exception('No data changed', 400, 'E_NO_DATA_CHANGED');
     }
   }
 
   public async get(user: User, id: number) {
-    return await this.checkOwnership(user, id);
+    const crudUtilities = new CrudUtilities();
+
+    return crudUtilities.formatReturn(
+      await this.checkOwnership(user, id),
+      this.stdReturn
+    );
   }
 
   public async getList(familyId: number) {
-    return await PostingGroup.query().where('familyId', familyId);
+    return await PostingGroup.query()
+      .select(this.stdReturn)
+      .where('familyId', familyId);
   }
 
   public async delete(user: User, id: number) {
+    const crudUtilities = new CrudUtilities();
     const postingGroup = await this.checkOwnership(user, id);
     await postingGroup.delete();
-    return postingGroup;
+    return crudUtilities.formatReturn(postingGroup, this.stdReturn);
   }
 
   private async checkOwnership(user: User, id: number) {

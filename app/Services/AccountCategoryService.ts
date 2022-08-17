@@ -4,8 +4,14 @@ import User from 'App/Models/User';
 import { CrudUtilities } from 'App/Util/crudUtilities';
 
 export class AccountCategoryService {
+  private stdReturn = ['id', 'familyId', 'description'];
+
   public async create(accountCategory: AccountCategory) {
-    return await accountCategory.save();
+    const crudUtilities = new CrudUtilities();
+    return crudUtilities.formatReturn(
+      await accountCategory.save(),
+      this.stdReturn
+    );
   }
 
   public async edit(user: User, id: number, description: string) {
@@ -22,24 +28,34 @@ export class AccountCategoryService {
     );
 
     if (changed === true) {
-      return await accountCategory.save();
+      return crudUtilities.formatReturn(
+        await accountCategory.save(),
+        this.stdReturn
+      );
     } else {
       throw new Exception('No data changed', 400, 'E_NO_DATA_CHANGED');
     }
   }
 
   public async get(user: User, id: number) {
-    return await this.checkOwnership(user, id);
+    const crudUtilities = new CrudUtilities();
+    return crudUtilities.formatReturn(
+      await this.checkOwnership(user, id),
+      this.stdReturn
+    );
   }
 
   public async getList(familyId: number) {
-    return await AccountCategory.query().where('familyId', familyId);
+    return await AccountCategory.query()
+      .select(this.stdReturn)
+      .where('familyId', familyId);
   }
 
   public async delete(user: User, id: number) {
+    const crudUtilities = new CrudUtilities();
     const accountCategory = await this.checkOwnership(user, id);
     await accountCategory.delete();
-    return accountCategory;
+    return crudUtilities.formatReturn(accountCategory, this.stdReturn);
   }
 
   private async checkOwnership(user: User, id: number) {

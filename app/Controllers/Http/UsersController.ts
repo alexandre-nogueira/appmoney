@@ -48,11 +48,18 @@ export default class UsersController {
       user.familyId = 0;
     }
 
+    const appLinkAdress = await RequestValidationService.validateString(
+      request,
+      'appLinkAdress',
+      []
+    );
+
     const registeredUserData = await userService.register(user, auth);
     if (registeredUserData) {
       await userService.sendConfirmationEmail(
         registeredUserData.email,
-        registeredUserData.confirmationCode
+        registeredUserData.confirmationCode,
+        appLinkAdress
       );
       if (token) {
         await familyService.destroyInvitationToken(token);
@@ -226,10 +233,20 @@ export default class UsersController {
       request,
       'email'
     );
+    const appLinkAdress = await RequestValidationService.validateString(
+      request,
+      'appLinkAdress',
+      []
+    );
+
     let user = await userService.getInactiveUser(email);
     await userService.generateRecoverToken(user);
 
-    await userService.sendRecoverUserEmail(email, user.rememberMeToken);
+    await userService.sendRecoverUserEmail(
+      email,
+      user.rememberMeToken,
+      appLinkAdress
+    );
 
     response.status(200);
     return { message: `Recover email send to ${user.email}` };

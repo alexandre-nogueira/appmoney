@@ -1,5 +1,4 @@
 import { TokenStatus } from './../types/TokenStatus';
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import { DateTime } from 'luxon';
 import { TokenService } from './TokenService';
 import { Exception } from '@adonisjs/core/build/standalone';
@@ -7,6 +6,7 @@ import Family from 'App/Models/Family';
 import FamilyInvitation from 'App/Models/FamilyInvitation';
 import User from 'App/Models/User';
 import { CrudUtilities } from 'App/Util/crudUtilities';
+import { NotificationService } from './notificationService';
 
 export class FamilyService {
   //Create new family
@@ -39,16 +39,30 @@ export class FamilyService {
     }
   }
 
+  public async renewMemberInvitation(
+    familyInvitation: FamilyInvitation,
+    message: string
+  ) {
+    await this.destroyInvitationToken(familyInvitation.token, false);
+    return await this.generateMemberInvitation(
+      familyInvitation.familyId,
+      familyInvitation.hostEmail,
+      familyInvitation.invitedEmail,
+      message
+    );
+  }
+
   public async generateMemberInvitation(
-    user: User,
+    familyId: number,
+    hostEmail: string,
     invitedEmail: string,
     message: string
   ) {
     const tokenService = new TokenService();
     const familyInvitation = new FamilyInvitation();
 
-    familyInvitation.familyId = user.familyId;
-    familyInvitation.hostEmail = user.email;
+    familyInvitation.familyId = familyId;
+    familyInvitation.hostEmail = hostEmail;
     familyInvitation.invitedEmail = invitedEmail;
     familyInvitation.message = message;
     familyInvitation.token = await tokenService.generateJWT({
@@ -82,10 +96,52 @@ export class FamilyService {
       invitedEmail: familyInvitation.invitedEmail,
       hostEmail: familyInvitation.hostEmail,
       message: familyInvitation.message,
+      expiresAt: familyInvitation.expiresAt,
     };
   }
 
-  public async destroyInvitationToken(token: string) {
+  public async getPendingInvitation(familyId: number, invitedEmail: string) {
+    return await FamilyInvitation.query()
+      .preload('family')
+      .where('familyId', familyId)
+      .andWhere('invitedEmail', invitedEmail)
+      .andWhere('expires_at', '>', DateTime.now().toISO())
+      .andWhere('status', TokenStatus.NEW)
+      .first();
+    // if (!pendingInvitation) {
+    //   throw new Exception(
+    //     'No Pending Invitations',
+    //     400,
+    //     'E_NO_PENDING_INVITATIONS'
+    //   );
+    // }
+    // return pendingInvitation;
+  }
+
+  public async getPendingInvitations(familyId: number) {
+    const pendingInvitations = await FamilyInvitation.query()
+      .select(
+        'id',
+        'family_id',
+        'invited_email',
+        'host_email',
+        'message',
+        'expires_at'
+      )
+      .where('familyId', familyId)
+      .andWhere('status', TokenStatus.NEW)
+      .andWhere('expires_at', '>', DateTime.now().toISO());
+    if (!pendingInvitations) {
+      throw new Exception(
+        'No Pending Invitations',
+        400,
+        'E_NO_PENDING_INVITATIONS'
+      );
+    }
+    return pendingInvitations;
+  }
+
+  public async destroyInvitationToken(token: string, isUsed = true) {
     const familyInvitation = await FamilyInvitation.query()
       .preload('family')
       .where('token', token)
@@ -99,7 +155,12 @@ export class FamilyService {
         'E_INVALID_FAMILY_INVITATION'
       );
     }
-    familyInvitation.status = TokenStatus.USED;
+    if (isUsed) {
+      familyInvitation.status = TokenStatus.USED;
+    } else {
+      familyInvitation.status = TokenStatus.CANCELED;
+    }
+    familyInvitation.expiresAt = DateTime.now();
     return await familyInvitation.save();
   }
 
@@ -117,5 +178,20 @@ export class FamilyService {
       );
     }
     return family;
+  }
+
+  public async sendFamilyInvitationEmail(
+    email: string,
+    token: string,
+    appLinkAdress: string
+  ) {
+    const notificationService = new NotificationService();
+    notificationService.sendFakeMail(
+      'Invite to App Money',
+      email,
+      `<h2>Você foi convidado para utilizar o app money
+      <a href=${appLinkAdress}/${token}>
+      clicando aqui</a></h2>`
+    );
   }
 }

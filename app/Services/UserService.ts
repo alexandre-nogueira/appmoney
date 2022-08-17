@@ -196,27 +196,35 @@ export class UserService {
   }
 
   //Send an email to the new registered user with the confirmation link
-  public async sendConfirmationEmail(email: string, confirmationCode: string) {
+  public async sendConfirmationEmail(
+    email: string,
+    confirmationCode: string,
+    appLinkAdress: string
+  ) {
     console.log({ email: email, confirmationCode: confirmationCode });
     const notificationService = new NotificationService();
     notificationService.sendFakeMail(
       'App Money Confirmation',
       email,
       `<h2>Por favor confirme seu cadastro
-      <a href=http://127.0.0.1:3333/api/confirm/${confirmationCode}>
+      <a href=${appLinkAdress}/${confirmationCode}>
       clicando aqui</a></h2>`
     );
   }
 
   //Send an email to recover inactive user
-  public async sendRecoverUserEmail(email: string, confirmationCode: string) {
+  public async sendRecoverUserEmail(
+    email: string,
+    confirmationCode: string,
+    appLinkAdress: string
+  ) {
     console.log({ email: email, confirmationCode: confirmationCode });
     const notificationService = new NotificationService();
     notificationService.sendFakeMail(
       'App Money - Recover User',
       email,
       `<h2>Para recuperar seu usuário,
-        <a href=http://127.0.0.1:3333/api/confirmRevocerToken/${confirmationCode}>
+        <a href=${appLinkAdress}/${confirmationCode}>
         clique aqui</a></h2>`
     );
   }
