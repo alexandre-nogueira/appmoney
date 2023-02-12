@@ -1,7 +1,14 @@
 import { DateTime } from 'luxon';
-import { BaseModel, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
+import {
+  belongsTo,
+  column,
+  HasOne,
+  hasOne,
+  BelongsTo,
+} from '@ioc:Adonis/Lucid/Orm';
 import Family from './Family';
 import AppBaseModel from './AppBaseModel';
+import Account from './Account';
 
 export default class AccountCategory extends AppBaseModel {
   @column({ isPrimary: true })

@@ -87,7 +87,7 @@ Route.group(() => {
 Route.group(() => {
   Route.get('', 'PostingGroupsController.getList');
   Route.get(':id', 'PostingGroupsController.getSingle');
-  Route.post('create', 'PostingGroupsController.create');
+  Route.post('', 'PostingGroupsController.create');
   Route.patch(':id', 'PostingGroupsController.edit');
   Route.delete(':id', 'PostingGroupsController.delete');
 })
@@ -98,7 +98,7 @@ Route.group(() => {
 Route.group(() => {
   Route.get('', 'PostingCategoriesController.getList');
   Route.get(':id', 'PostingCategoriesController.getSingle');
-  Route.post('create', 'PostingCategoriesController.create');
+  Route.post('', 'PostingCategoriesController.create');
   Route.patch(':id', 'PostingCategoriesController.edit');
   Route.delete(':id', 'PostingCategoriesController.delete');
 })
@@ -110,7 +110,7 @@ Route.group(() => {
   Route.get('userAccounts', 'AccountsController.getUserAccounts');
   Route.get('familyAccounts', 'AccountsController.getFamilyAccounts');
   Route.get(':id', 'AccountsController.getSingle');
-  Route.post('create', 'AccountsController.create');
+  Route.post('', 'AccountsController.create');
   Route.patch(':id', 'AccountsController.edit');
   Route.delete(':id', 'AccountsController.delete');
 })
@@ -128,4 +128,3 @@ Route.group(() => {
   Route.patch(':id', 'PostingsController.edit');
   Route.delete(':id', 'PostingsController.delete');
 }).prefix('posting');
-//.middleware('auth:api');

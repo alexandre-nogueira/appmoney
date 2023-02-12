@@ -13,10 +13,18 @@ export class CrudUtilities {
     return changed;
   }
 
-  public formatReturn(entity, fields: Array<string>) {
+  public formatReturn(
+    entity: any,
+    fields: Array<string>,
+    addtionalFields?: Array<string>
+  ) {
     let obj = new Object();
 
     fields.forEach((field) => {
+      obj[field] = entity[field];
+    });
+
+    addtionalFields?.forEach((field) => {
       obj[field] = entity[field];
     });
 

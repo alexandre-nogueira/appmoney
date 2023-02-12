@@ -11,17 +11,26 @@ export default class Posting extends AppBaseModel {
 
   @column()
   public accountId: number;
-  @hasOne(() => Account)
+  @hasOne(() => Account, {
+    foreignKey: 'id',
+    localKey: 'accountId',
+  })
   public account: HasOne<typeof Account>;
 
   @column()
   public postingGroupId: number;
-  @hasOne(() => PostingGroup)
+  @hasOne(() => PostingGroup, {
+    foreignKey: 'id',
+    localKey: 'postingGroupId',
+  })
   public postingGroup: HasOne<typeof PostingGroup>;
 
   @column()
   public postingCategoryId: number;
-  @hasOne(() => PostingCategory)
+  @hasOne(() => PostingCategory, {
+    foreignKey: 'id',
+    localKey: 'postingCategoryId',
+  })
   public postingCategory: HasOne<typeof PostingCategory>;
 
   @column()

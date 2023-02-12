@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { BaseModel, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
+import { column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm';
 import User from './User';
 import AccountCategory from './AccountCategory';
 import AppBaseModel from './AppBaseModel';
@@ -10,7 +10,10 @@ export default class Account extends AppBaseModel {
 
   @column()
   public userId: number;
-  @hasOne(() => User)
+  @hasOne(() => User, {
+    foreignKey: 'id',
+    localKey: 'userId',
+  })
   public user: HasOne<typeof User>;
 
   @column()
@@ -18,7 +21,10 @@ export default class Account extends AppBaseModel {
 
   @column()
   public accountCategoryId: number;
-  @hasOne(() => AccountCategory)
+  @hasOne(() => AccountCategory, {
+    foreignKey: 'id',
+    localKey: 'accountCategoryId',
+  })
   public accountCategory: HasOne<typeof AccountCategory>;
 
   @column()

@@ -1,16 +1,15 @@
 import { Exception } from '@adonisjs/core/build/standalone';
 import AccountCategory from 'App/Models/AccountCategory';
 import User from 'App/Models/User';
+import { AccountCategoryAPIReturn } from 'App/types/APIReturnFormats';
 import { CrudUtilities } from 'App/Util/crudUtilities';
 
 export class AccountCategoryService {
-  private stdReturn = ['id', 'familyId', 'description'];
-
   public async create(accountCategory: AccountCategory) {
     const crudUtilities = new CrudUtilities();
     return crudUtilities.formatReturn(
       await accountCategory.save(),
-      this.stdReturn
+      AccountCategoryAPIReturn
     );
   }
 
@@ -30,7 +29,7 @@ export class AccountCategoryService {
     if (changed === true) {
       return crudUtilities.formatReturn(
         await accountCategory.save(),
-        this.stdReturn
+        AccountCategoryAPIReturn
       );
     } else {
       throw new Exception('No data changed', 400, 'E_NO_DATA_CHANGED');
@@ -41,13 +40,13 @@ export class AccountCategoryService {
     const crudUtilities = new CrudUtilities();
     return crudUtilities.formatReturn(
       await this.checkOwnership(user, id),
-      this.stdReturn
+      AccountCategoryAPIReturn
     );
   }
 
   public async getList(familyId: number) {
     return await AccountCategory.query()
-      .select(this.stdReturn)
+      .select(AccountCategoryAPIReturn)
       .where('familyId', familyId);
   }
 
@@ -55,7 +54,10 @@ export class AccountCategoryService {
     const crudUtilities = new CrudUtilities();
     const accountCategory = await this.checkOwnership(user, id);
     await accountCategory.delete();
-    return crudUtilities.formatReturn(accountCategory, this.stdReturn);
+    return crudUtilities.formatReturn(
+      accountCategory,
+      AccountCategoryAPIReturn
+    );
   }
 
   private async checkOwnership(user: User, id: number) {

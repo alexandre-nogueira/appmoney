@@ -1,16 +1,17 @@
+import { PostingGroupAPIReturn } from './../types/APIReturnFormats';
 import { Exception } from '@adonisjs/core/build/standalone';
 import PostingGroup from 'App/Models/PostingGroup';
 import User from 'App/Models/User';
 import { CrudUtilities } from 'App/Util/crudUtilities';
 
 export class PostingGroupService {
-  private stdReturn = ['id', 'familyId', 'description'];
+  // private stdReturn = ['id', 'familyId', 'description'];
 
   public async create(postingGroup: PostingGroup) {
     const crudUtilities = new CrudUtilities();
     return crudUtilities.formatReturn(
       await postingGroup.save(),
-      this.stdReturn
+      PostingGroupAPIReturn
     );
   }
 
@@ -30,7 +31,7 @@ export class PostingGroupService {
     if (changed === true) {
       return crudUtilities.formatReturn(
         await postingGroup.save(),
-        this.stdReturn
+        PostingGroupAPIReturn
       );
     } else {
       throw new Exception('No data changed', 400, 'E_NO_DATA_CHANGED');
@@ -42,13 +43,13 @@ export class PostingGroupService {
 
     return crudUtilities.formatReturn(
       await this.checkOwnership(user, id),
-      this.stdReturn
+      PostingGroupAPIReturn
     );
   }
 
   public async getList(familyId: number) {
     return await PostingGroup.query()
-      .select(this.stdReturn)
+      .select(PostingGroupAPIReturn)
       .where('familyId', familyId);
   }
 
@@ -56,7 +57,7 @@ export class PostingGroupService {
     const crudUtilities = new CrudUtilities();
     const postingGroup = await this.checkOwnership(user, id);
     await postingGroup.delete();
-    return crudUtilities.formatReturn(postingGroup, this.stdReturn);
+    return crudUtilities.formatReturn(postingGroup, PostingGroupAPIReturn);
   }
 
   private async checkOwnership(user: User, id: number) {

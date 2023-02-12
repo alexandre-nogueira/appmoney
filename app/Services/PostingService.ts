@@ -1,3 +1,9 @@
+import {
+  PostingAPIReturn,
+  AccountAPIReturn,
+  PostingCategoryAPIReturn,
+  PostingGroupAPIReturn,
+} from './../types/APIReturnFormats';
 import { Exception } from '@adonisjs/core/build/standalone';
 import Database from '@ioc:Adonis/Lucid/Database';
 import Account from 'App/Models/Account';
@@ -9,10 +15,16 @@ import { DateTime } from 'luxon';
 import { AccountService } from './AccountService';
 
 export class PostingService {
+  private crudUtilities = new CrudUtilities();
+
   public async create(user: User, posting: Posting) {
     const accountService = new AccountService();
     await accountService.checkOwnership(user, posting.accountId);
-    return await posting.save();
+    return this.crudUtilities.formatReturn(
+      await posting.save(),
+      PostingAPIReturn,
+      ['account', 'postingCategory', 'postingGroup']
+    );
   }
 
   public async edit(
@@ -75,7 +87,11 @@ export class PostingService {
   }
 
   public async get(user: User, id: number) {
-    return this.checkOwnership(user, id);
+    return this.crudUtilities.formatReturn(
+      await this.checkOwnership(user, id),
+      PostingAPIReturn,
+      ['account', 'postingCategory', 'postingGroup']
+    );
   }
 
   public async getList(
@@ -104,6 +120,16 @@ export class PostingService {
     }
     console.log(validatedAccounts);
     const postings = await Posting.query()
+      .select(PostingAPIReturn)
+      .preload('account', (accountQuery) => {
+        accountQuery.select(AccountAPIReturn);
+      })
+      .preload('postingCategory', (postingCategoryQuery) => {
+        postingCategoryQuery.select(PostingCategoryAPIReturn);
+      })
+      .preload('postingGroup', (postingGroupQuery) => {
+        postingGroupQuery.select(PostingGroupAPIReturn);
+      })
       .where((subQuery) => {
         subQuery.whereIn('account_id', validatedAccounts).andWhere((query) => {
           query
@@ -122,7 +148,6 @@ export class PostingService {
         }
       })
       .paginate(page, perPage);
-    // .toQuery();
     return postings;
   }
 
@@ -137,7 +162,11 @@ export class PostingService {
     }
     posting.paymentDate = paymentDate;
     posting.status = PostingStatus.PAID;
-    return await posting.save();
+    return this.crudUtilities.formatReturn(
+      await posting.save(),
+      PostingAPIReturn,
+      ['account', 'postingCategory', 'postingGroup']
+    );
   }
 
   public async reversePayment(user: User, id: number) {
@@ -149,13 +178,21 @@ export class PostingService {
       'update postings set payment_date = null, status = :status where id = :id',
       { status: PostingStatus.REVERSED, id: posting.id }
     );
-    return await Posting.query().where('id', posting.id).first();
+    return this.crudUtilities.formatReturn(
+      await Posting.query().where('id', posting.id).first(),
+      PostingAPIReturn,
+      ['account', 'postingCategory', 'postingGroup']
+    );
   }
 
   public async delete(user: User, id: number) {
     const posting = await this.checkOwnership(user, id);
     posting.status = PostingStatus.DELETED;
-    return await posting.save();
+    return this.crudUtilities.formatReturn(
+      await posting.save(),
+      PostingAPIReturn,
+      ['account', 'postingCategory', 'postingGroup']
+    );
   }
 
   public async checkAccountsOwnership(user: User, accountIds: number[]) {
@@ -171,7 +208,19 @@ export class PostingService {
   }
 
   public async checkOwnership(user: User, id: number) {
-    const posting = await Posting.query().where('id', id).first();
+    const posting = await Posting.query()
+      .select(PostingAPIReturn)
+      .preload('account', (accountQuery) => {
+        accountQuery.select(AccountAPIReturn);
+      })
+      .preload('postingCategory', (postingCategoryQuery) => {
+        postingCategoryQuery.select(PostingCategoryAPIReturn);
+      })
+      .preload('postingGroup', (postingGroupQuery) => {
+        postingGroupQuery.select(PostingGroupAPIReturn);
+      })
+      .where('id', id)
+      .first();
 
     if (posting) {
       const account = await Account.query()
@@ -196,11 +245,11 @@ export class PostingService {
     return posting;
   }
 
-  public getPostingStatusListAsStringArray() {
-    return Object.values(PostingStatus).map((value) => {
-      return value.toString();
-    });
-  }
+  // public getPostingStatusListAsStringArray() {
+  //   return Object.values(PostingStatus).map((value) => {
+  //     return value.toString();
+  //   });
+  // }
 
   public async checkDuplicated(posting: Posting) {
     //User 3 fields to check possible duplicated posting
