@@ -20,6 +20,11 @@ export class PostingService {
   public async create(user: User, posting: Posting) {
     const accountService = new AccountService();
     await accountService.checkOwnership(user, posting.accountId);
+    if (posting.paymentDate !== undefined) {
+      posting.status = PostingStatus.PAID;
+    } else {
+      posting.status = PostingStatus.PENDING;
+    }
     return this.crudUtilities.formatReturn(
       await posting.save(),
       PostingAPIReturn,
@@ -33,7 +38,6 @@ export class PostingService {
     accountId: number,
     postingCategoryId: number,
     postingGroupId: number,
-    status: string,
     description: string,
     value: number,
     dueDate: DateTime,
@@ -61,7 +65,6 @@ export class PostingService {
       'postingGroupId',
       changed
     );
-    crudUtilities.compareField(status, posting, 'status', changed);
     changed = crudUtilities.compareField(
       description,
       posting,
@@ -77,10 +80,20 @@ export class PostingService {
     if (paymentDate?.toISODate() !== posting.paymentDate?.toISODate()) {
       changed = true;
       posting.paymentDate = paymentDate;
+      if (posting.paymentDate === undefined) {
+        posting.status = PostingStatus.REVERSED;
+        posting.paymentDate = null;
+      } else {
+        posting.status = PostingStatus.PAID;
+      }
     }
 
     if (changed) {
-      return await posting.save();
+      return this.crudUtilities.formatReturn(
+        (await posting.save()).serialize(),
+        PostingAPIReturn,
+        ['account', 'postingCategory', 'postingGroup']
+      );
     } else {
       throw new Exception('No data changed', 400, 'E_NO_DATA_CHANGED');
     }
@@ -118,7 +131,6 @@ export class PostingService {
         throw new Exception('Invalid Accound Ids', 401, 'E_INVALID_ACCOUND_ID');
       }
     }
-    console.log(validatedAccounts);
     const postings = await Posting.query()
       .select(PostingAPIReturn)
       .preload('account', (accountQuery) => {
@@ -163,7 +175,7 @@ export class PostingService {
     posting.paymentDate = paymentDate;
     posting.status = PostingStatus.PAID;
     return this.crudUtilities.formatReturn(
-      await posting.save(),
+      (await posting.save()).serialize(),
       PostingAPIReturn,
       ['account', 'postingCategory', 'postingGroup']
     );
@@ -189,9 +201,32 @@ export class PostingService {
     const posting = await this.checkOwnership(user, id);
     posting.status = PostingStatus.DELETED;
     return this.crudUtilities.formatReturn(
-      await posting.save(),
+      (await posting.save()).serialize(),
       PostingAPIReturn,
       ['account', 'postingCategory', 'postingGroup']
+    );
+  }
+
+  public async restore(user: User, id: number) {
+    const posting = await this.checkOwnership(user, id);
+
+    if (posting.status !== PostingStatus.DELETED) {
+      throw new Exception(
+        'Posting is not deleted',
+        400,
+        'E_POSTING_NOT_DELETED'
+      );
+    }
+
+    if (posting.paymentDate !== null) {
+      posting.status = PostingStatus.PAID;
+    } else {
+      posting.status = PostingStatus.PENDING;
+    }
+    return this.crudUtilities.formatReturn(
+      (await posting.save()).serialize(),
+      PostingAPIReturn,
+      ['account', 'postingCategory', 'postingGroup', 'formattedDueDate']
     );
   }
 
@@ -244,12 +279,6 @@ export class PostingService {
     }
     return posting;
   }
-
-  // public getPostingStatusListAsStringArray() {
-  //   return Object.values(PostingStatus).map((value) => {
-  //     return value.toString();
-  //   });
-  // }
 
   public async checkDuplicated(posting: Posting) {
     //User 3 fields to check possible duplicated posting

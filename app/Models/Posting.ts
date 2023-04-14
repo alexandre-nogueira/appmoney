@@ -39,11 +39,15 @@ export default class Posting extends AppBaseModel {
   @column()
   public value: number;
 
-  @column.date()
+  @column.date({
+    serialize: (value: DateTime) => {
+      return value.toFormat('yyyy-MM-dd');
+    },
+  })
   public dueDate: DateTime;
 
   @column.date()
-  public paymentDate?: DateTime;
+  public paymentDate?: DateTime | null;
 
   @column()
   public tag: string;

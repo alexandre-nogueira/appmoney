@@ -30,7 +30,7 @@ export default class PostingsController {
               where: { family_id: user.familyId },
             }),
           ]),
-          status: schema.enum(Object.values(PostingStatus)),
+          // status: schema.enum(Object.values(PostingStatus)),
           description: schema.string({}, [
             rules.maxLength(255),
             rules.minLength(1),
@@ -50,7 +50,7 @@ export default class PostingsController {
       posting.accountId = requestData.accountId;
       posting.postingCategoryId = requestData.postingCategoryId;
       posting.postingGroupId = requestData.postingGroupId;
-      posting.status = requestData.status;
+      // posting.status = requestData.status;
       posting.description = requestData.description;
       posting.value = requestData.value;
       posting.dueDate = requestData.dueDate;
@@ -108,11 +108,11 @@ export default class PostingsController {
       ]
     );
 
-    posting.status = await RequestValidationService.validateEnum(
-      request,
-      'status',
-      Object.values(PostingStatus)
-    );
+    // posting.status = await RequestValidationService.validateEnum(
+    //   request,
+    //   'status',
+    //   Object.values(PostingStatus)
+    // );
 
     posting.description = await RequestValidationService.validateString(
       request,
@@ -132,7 +132,7 @@ export default class PostingsController {
       []
     );
 
-    posting.paymentDate = await RequestValidationService.validateDate(
+    posting.paymentDate = await RequestValidationService.validateOptionalDate(
       request,
       'paymentDate',
       []
@@ -177,12 +177,6 @@ export default class PostingsController {
       ]
     );
 
-    const status = await RequestValidationService.validateEnum(
-      request,
-      'status',
-      Object.values(PostingStatus)
-    );
-
     const description = await RequestValidationService.validateString(
       request,
       'description',
@@ -213,7 +207,6 @@ export default class PostingsController {
       accountId,
       postingCategoryId,
       postingGroupId,
-      status,
       description,
       value,
       dueDate,
@@ -356,30 +349,37 @@ export default class PostingsController {
     return postingService.get(user, params.id);
   }
 
-  public async pay({ auth, params, request }: HttpContextContract) {
-    const user = await auth.authenticate();
-    const postingService = new PostingService();
+  // public async pay({ auth, params, request }: HttpContextContract) {
+  //   const user = await auth.authenticate();
+  //   const postingService = new PostingService();
 
-    const paymentDate = await RequestValidationService.validateDate(
-      request,
-      'paymentDate',
-      []
-    );
+  //   const paymentDate = await RequestValidationService.validateDate(
+  //     request,
+  //     'paymentDate',
+  //     []
+  //   );
 
-    return await postingService.pay(user, params.id, paymentDate);
-  }
+  //   return await postingService.pay(user, params.id, paymentDate);
+  // }
 
-  public async reversePayment({ auth, params }: HttpContextContract) {
-    const user = await auth.authenticate();
-    const postingService = new PostingService();
+  // public async reversePayment({ auth, params }: HttpContextContract) {
+  //   const user = await auth.authenticate();
+  //   const postingService = new PostingService();
 
-    return postingService.reversePayment(user, params.id);
-  }
+  //   return postingService.reversePayment(user, params.id);
+  // }
 
   public async delete({ auth, params }: HttpContextContract) {
     const user = await auth.authenticate();
     const postingService = new PostingService();
 
     return await postingService.delete(user, params.id);
+  }
+
+  public async restore({ auth, params }: HttpContextContract) {
+    const user = await auth.authenticate();
+    const postingService = new PostingService();
+
+    return await postingService.restore(user, params.id);
   }
 }

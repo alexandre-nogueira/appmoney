@@ -123,8 +123,9 @@ Route.group(() => {
   Route.get(':id', 'PostingsController.getSingle');
   Route.post('create', 'PostingsController.create');
   Route.post('createMultiple', 'PostingsController.createMultiple');
-  Route.patch(':id/pay', 'PostingsController.pay');
-  Route.patch(':id/reversePayment', 'PostingsController.reversePayment');
+  // Route.patch(':id/pay', 'PostingsController.pay');
+  // Route.patch(':id/reversePayment', 'PostingsController.reversePayment');
+  Route.get(':id/restore', 'PostingsController.restore');
   Route.patch(':id', 'PostingsController.edit');
   Route.delete(':id', 'PostingsController.delete');
 }).prefix('posting');
