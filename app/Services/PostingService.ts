@@ -36,8 +36,8 @@ export class PostingService {
     user: User,
     id: number,
     accountId: number,
-    postingCategoryId: number,
-    postingGroupId: number,
+    postingCategoryId: number | undefined,
+    postingGroupId: number | undefined,
     description: string,
     value: number,
     dueDate: DateTime,
@@ -89,6 +89,9 @@ export class PostingService {
     }
 
     if (changed) {
+      if (posting.postingCategoryId === undefined)
+        posting.postingCategoryId = null;
+      if (posting.postingGroupId === undefined) posting.postingGroupId = null;
       return this.crudUtilities.formatReturn(
         (await posting.save()).serialize(),
         PostingAPIReturn,
@@ -289,6 +292,7 @@ export class PostingService {
       .where('due_date', posting.dueDate.toSQLDate())
       .andWhere('description', posting.description)
       .andWhere('value', posting.value)
+      .andWhere('status', '!=', PostingStatus.DELETED)
       .first();
     if (duplicatedPosting) {
       return true;

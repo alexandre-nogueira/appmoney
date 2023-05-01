@@ -16,14 +16,14 @@ export default class PostingsController {
       postings: schema.array().members(
         schema.object().members({
           accountId: schema.number(),
-          postingCategoryId: schema.number([
+          postingCategoryId: schema.number.optional([
             rules.exists({
               table: 'posting_categories',
               column: 'id',
               where: { family_id: user.familyId },
             }),
           ]),
-          postingGroupId: schema.number([
+          postingGroupId: schema.number.optional([
             rules.exists({
               table: 'posting_groups',
               column: 'id',
@@ -37,7 +37,7 @@ export default class PostingsController {
           ]),
           value: schema.number(),
           dueDate: schema.date(),
-          paymentDate: schema.date(),
+          paymentDate: schema.date.optional(),
         })
       ),
       ignoreDuplicated: schema.boolean(),
@@ -84,29 +84,31 @@ export default class PostingsController {
       []
     );
 
-    posting.postingCategoryId = await RequestValidationService.validateNumber(
-      request,
-      'postingCategoryId',
-      [
-        rules.exists({
-          table: 'posting_categories',
-          column: 'id',
-          where: { family_id: user.familyId },
-        }),
-      ]
-    );
+    posting.postingCategoryId =
+      await RequestValidationService.validateOptionalNumber(
+        request,
+        'postingCategoryId',
+        [
+          rules.exists({
+            table: 'posting_categories',
+            column: 'id',
+            where: { family_id: user.familyId },
+          }),
+        ]
+      );
 
-    posting.postingGroupId = await RequestValidationService.validateNumber(
-      request,
-      'postingGroupId',
-      [
-        rules.exists({
-          table: 'posting_groups',
-          column: 'id',
-          where: { family_id: user.familyId },
-        }),
-      ]
-    );
+    posting.postingGroupId =
+      await RequestValidationService.validateOptionalNumber(
+        request,
+        'postingGroupId',
+        [
+          rules.exists({
+            table: 'posting_groups',
+            column: 'id',
+            where: { family_id: user.familyId },
+          }),
+        ]
+      );
 
     // posting.status = await RequestValidationService.validateEnum(
     //   request,
@@ -153,29 +155,31 @@ export default class PostingsController {
       []
     );
 
-    const postingCategoryId = await RequestValidationService.validateNumber(
-      request,
-      'postingCategoryId',
-      [
-        rules.exists({
-          table: 'posting_categories',
-          column: 'id',
-          where: { family_id: user.familyId },
-        }),
-      ]
-    );
+    const postingCategoryId =
+      await RequestValidationService.validateOptionalNumber(
+        request,
+        'postingCategoryId',
+        [
+          rules.exists({
+            table: 'posting_categories',
+            column: 'id',
+            where: { family_id: user.familyId },
+          }),
+        ]
+      );
 
-    const postingGroupId = await RequestValidationService.validateNumber(
-      request,
-      'postingGroupId',
-      [
-        rules.exists({
-          table: 'posting_groups',
-          column: 'id',
-          where: { family_id: user.familyId },
-        }),
-      ]
-    );
+    const postingGroupId =
+      await RequestValidationService.validateOptionalNumber(
+        request,
+        'postingGroupId',
+        [
+          rules.exists({
+            table: 'posting_groups',
+            column: 'id',
+            where: { family_id: user.familyId },
+          }),
+        ]
+      );
 
     const description = await RequestValidationService.validateString(
       request,

@@ -13,7 +13,12 @@ export class PostingCategoryService {
     );
   }
 
-  public async edit(user: User, id: number, description: string) {
+  public async edit(
+    user: User,
+    id: number,
+    description: string,
+    nature: string
+  ) {
     let changed = false;
     const crudUtilities = new CrudUtilities();
     const postingCategory = await this.checkOwnership(user, id);
@@ -24,6 +29,14 @@ export class PostingCategoryService {
       'description',
       changed
     );
+
+    changed = crudUtilities.compareField(
+      nature,
+      postingCategory,
+      'nature',
+      changed
+    );
+
     if (changed === true) {
       return crudUtilities.formatReturn(
         await postingCategory.save(),
@@ -71,6 +84,7 @@ export class PostingCategoryService {
         'E_ENTITY_DOES_NOT_EXISTS'
       );
     }
+
     return postingCategory;
   }
 }

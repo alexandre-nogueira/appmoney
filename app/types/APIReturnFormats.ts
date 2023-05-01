@@ -1,6 +1,11 @@
 export const AccountCategoryAPIReturn = ['id', 'familyId', 'description'];
 
-export const PostingCategoryAPIReturn = ['id', 'familyId', 'description'];
+export const PostingCategoryAPIReturn = [
+  'id',
+  'familyId',
+  'description',
+  'nature',
+];
 
 export const PostingGroupAPIReturn = ['id', 'familyId', 'description'];
 

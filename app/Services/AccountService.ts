@@ -148,7 +148,6 @@ export class AccountService {
       .first();
 
     if (!account) {
-      // console.log(`${id} não existe`);
       throw new Exception(
         'Account does not exists',
         400,

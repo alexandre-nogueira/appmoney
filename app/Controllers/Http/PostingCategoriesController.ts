@@ -3,6 +3,7 @@ import { PostingCategoryService } from 'App/Services/PostingCategoryService';
 import { RequestValidationService } from 'App/Util/RequestValidation';
 import { rules } from '@ioc:Adonis/Core/Validator';
 import PostingCategory from 'App/Models/PostingCategory';
+import { Natures } from 'App/types/Nature';
 export default class PostingCategoriesController {
   public async getList({ auth }: HttpContextContract) {
     const user = await auth.authenticate();
@@ -27,6 +28,13 @@ export default class PostingCategoriesController {
       'description',
       [rules.maxLength(120)]
     );
+
+    postingCategory.nature = await RequestValidationService.validateEnum(
+      request,
+      'nature',
+      Object.values(Natures)
+    );
+
     postingCategory.familyId = user.familyId;
 
     return await postingCategoryService.create(postingCategory);
@@ -42,7 +50,18 @@ export default class PostingCategoriesController {
       [rules.maxLength(120)]
     );
 
-    return postingCategoryService.edit(user, params.id, newDescription);
+    const newNature = await RequestValidationService.validateEnum(
+      request,
+      'nature',
+      Object.values(Natures)
+    );
+
+    return postingCategoryService.edit(
+      user,
+      params.id,
+      newDescription,
+      newNature
+    );
   }
 
   public async delete({ auth, params }: HttpContextContract) {
