@@ -140,6 +140,27 @@ export default class PostingsController {
       []
     );
 
+    posting.installment =
+      (await RequestValidationService.validateOptionalNumber(
+        request,
+        'installment',
+        []
+      )) ?? 0;
+
+    posting.installments =
+      (await RequestValidationService.validateOptionalNumber(
+        request,
+        'installments',
+        []
+      )) ?? 0;
+
+    posting.observation =
+      (await RequestValidationService.validateOptionalString(
+        request,
+        'observation',
+        []
+      )) ?? '';
+
     return await postingService.create(user, posting);
   }
 
@@ -205,6 +226,27 @@ export default class PostingsController {
       []
     );
 
+    const installment =
+      (await RequestValidationService.validateOptionalNumber(
+        request,
+        'installment',
+        []
+      )) ?? 0;
+
+    const installments =
+      (await RequestValidationService.validateOptionalNumber(
+        request,
+        'installments',
+        []
+      )) ?? 0;
+
+    const observation =
+      (await RequestValidationService.validateOptionalString(
+        request,
+        'observation',
+        []
+      )) ?? '';
+
     return await postingService.edit(
       user,
       id,
@@ -214,7 +256,10 @@ export default class PostingsController {
       description,
       value,
       dueDate,
-      paymentDate
+      paymentDate,
+      installment,
+      installments,
+      observation
     );
   }
 
@@ -316,6 +361,12 @@ export default class PostingsController {
       []
     );
 
+    const installmentsOnly = await RequestValidationService.validateBoolean(
+      request,
+      'installmentsOnly',
+      []
+    );
+
     let page = await RequestValidationService.validateOptionalNumber(
       request,
       'page',
@@ -342,9 +393,17 @@ export default class PostingsController {
       statusQuery,
       postingCategoryQuery,
       postingGroupQuery,
+      installmentsOnly,
       page,
       perPage
     );
+  }
+
+  public async getFutureInstallments({ auth }: HttpContextContract) {
+    const postingService = new PostingService();
+    const user = await auth.authenticate();
+
+    return postingService.getFutureInstallments(user);
   }
 
   public async getSingle({ auth, params }: HttpContextContract) {
@@ -352,26 +411,6 @@ export default class PostingsController {
     const postingService = new PostingService();
     return postingService.get(user, params.id);
   }
-
-  // public async pay({ auth, params, request }: HttpContextContract) {
-  //   const user = await auth.authenticate();
-  //   const postingService = new PostingService();
-
-  //   const paymentDate = await RequestValidationService.validateDate(
-  //     request,
-  //     'paymentDate',
-  //     []
-  //   );
-
-  //   return await postingService.pay(user, params.id, paymentDate);
-  // }
-
-  // public async reversePayment({ auth, params }: HttpContextContract) {
-  //   const user = await auth.authenticate();
-  //   const postingService = new PostingService();
-
-  //   return postingService.reversePayment(user, params.id);
-  // }
 
   public async delete({ auth, params }: HttpContextContract) {
     const user = await auth.authenticate();

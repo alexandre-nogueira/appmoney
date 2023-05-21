@@ -28,4 +28,7 @@ export const PostingAPIReturn = [
   'dueDate',
   'paymentDate',
   'status',
+  'installment',
+  'installments',
+  'observation',
 ];

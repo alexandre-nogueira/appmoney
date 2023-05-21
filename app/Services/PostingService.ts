@@ -41,7 +41,10 @@ export class PostingService {
     description: string,
     value: number,
     dueDate: DateTime,
-    paymentDate: DateTime | undefined
+    paymentDate: DateTime | undefined,
+    installment: number = 0,
+    installments: number = 0,
+    observation: string | undefined
   ) {
     const posting = await this.checkOwnership(user, id);
     const crudUtilities = new CrudUtilities();
@@ -71,6 +74,25 @@ export class PostingService {
       'description',
       changed
     );
+    changed = crudUtilities.compareField(
+      installment,
+      posting,
+      'installment',
+      changed
+    );
+    changed = crudUtilities.compareField(
+      installments,
+      posting,
+      'installments',
+      changed
+    );
+    changed = crudUtilities.compareField(
+      observation,
+      posting,
+      'observation',
+      changed
+    );
+
     changed = crudUtilities.compareField(value, posting, 'value', changed);
 
     if (dueDate.toISODate() !== posting.dueDate.toISODate()) {
@@ -118,6 +140,7 @@ export class PostingService {
     status: string[],
     postingCategory: number[],
     postingGroup: number[],
+    installmentsOnly: boolean,
     page: number,
     perPage: number
   ) {
@@ -161,9 +184,52 @@ export class PostingService {
         if (postingGroup.length > 0) {
           subQuery.andWhereIn('posting_group_id', postingGroup);
         }
+        if (installmentsOnly === true) {
+          subQuery
+            .andWhereNotNull('installments')
+            .andWhere('installments', '!=', 0);
+        }
       })
       .paginate(page, perPage);
+
     return postings;
+  }
+
+  public async getFutureInstallments(user: User) {
+    const postingListPaginated = await this.getList(
+      user,
+      [],
+      DateTime.local().minus({ months: 1 }).startOf('month'),
+      DateTime.local().minus({ months: 1 }).endOf('month'),
+      [],
+      [],
+      [],
+      true,
+      1,
+      5000
+    );
+    // return postingList;
+
+    const postingList = postingListPaginated.all();
+
+    const currentInstallments = postingList.filter((posting) => {
+      return posting.installments > posting.installment;
+    });
+
+    let futureInstallments: any[] = [];
+
+    currentInstallments.forEach((posting) => {
+      const remainingInstallments = posting.installments - posting.installment;
+      let futurePosting = posting.toObject();
+      let installment = posting.installment;
+      for (let index = 1; index <= remainingInstallments; index++) {
+        installment += 1;
+        futurePosting.installment = installment;
+        futureInstallments.push({ ...futurePosting });
+      }
+    });
+
+    return futureInstallments;
   }
 
   public async pay(user: User, id: number, paymentDate: DateTime) {

@@ -25,11 +25,6 @@ export default class Posting extends AppBaseModel {
 
   @column()
   public postingGroupId: number | undefined | null;
-  // @hasOne(() => PostingGroup, {
-  //   foreignKey: 'id',
-  //   localKey: 'postingGroupId',
-  // })
-  // public postingGroup: HasOne<typeof PostingGroup>;
   @belongsTo(() => PostingGroup, {
     foreignKey: 'postingGroupId',
     localKey: 'id',
@@ -38,11 +33,7 @@ export default class Posting extends AppBaseModel {
 
   @column()
   public postingCategoryId: number | undefined | null;
-  // @hasOne(() => PostingCategory, {
-  //   foreignKey: 'id',
-  //   localKey: 'postingCategoryId',
-  // })
-  // public postingCategory: HasOne<typeof PostingCategory>;
+
   @belongsTo(() => PostingCategory, {
     foreignKey: 'postingCategoryId',
     localKey: 'id',
@@ -70,6 +61,15 @@ export default class Posting extends AppBaseModel {
 
   @column()
   public status: string;
+
+  @column()
+  public installment: number;
+
+  @column()
+  public installments: number;
+
+  @column()
+  public observation: string;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

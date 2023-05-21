@@ -119,6 +119,7 @@ Route.group(() => {
 
 //Posting
 Route.group(() => {
+  Route.get('futureInstallments', 'PostingsController.getFutureInstallments');
   Route.get('', 'PostingsController.getList');
   Route.get(':id', 'PostingsController.getSingle');
   Route.post('create', 'PostingsController.create');
