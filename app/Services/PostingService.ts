@@ -195,12 +195,16 @@ export class PostingService {
     return postings;
   }
 
-  public async getFutureInstallments(user: User) {
+  public async getFutureInstallments(
+    user: User,
+    baseMonth: DateTime,
+    targetMonth: DateTime
+  ) {
     const postingListPaginated = await this.getList(
       user,
       [],
-      DateTime.local().minus({ months: 1 }).startOf('month'),
-      DateTime.local().minus({ months: 1 }).endOf('month'),
+      baseMonth.startOf('month'),
+      baseMonth.endOf('month'),
       [],
       [],
       [],
@@ -208,7 +212,10 @@ export class PostingService {
       1,
       5000
     );
-    // return postingList;
+
+    const dif = Math.round(
+      targetMonth.diff(baseMonth, ['months']).toObject().months ?? 0
+    );
 
     const postingList = postingListPaginated.all();
 
@@ -220,11 +227,11 @@ export class PostingService {
 
     currentInstallments.forEach((posting) => {
       const remainingInstallments = posting.installments - posting.installment;
-      let futurePosting = posting.toObject();
-      let installment = posting.installment;
-      for (let index = 1; index <= remainingInstallments; index++) {
-        installment += 1;
-        futurePosting.installment = installment;
+      if (remainingInstallments >= dif) {
+        let futurePosting = posting.toObject();
+        futurePosting.installment += dif;
+
+        futurePosting.dueDate = posting.dueDate.plus({ months: dif });
         futureInstallments.push({ ...futurePosting });
       }
     });

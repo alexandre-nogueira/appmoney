@@ -399,11 +399,22 @@ export default class PostingsController {
     );
   }
 
-  public async getFutureInstallments({ auth }: HttpContextContract) {
+  public async getFutureInstallments({ auth, request }: HttpContextContract) {
     const postingService = new PostingService();
     const user = await auth.authenticate();
 
-    return postingService.getFutureInstallments(user);
+    const baseMonth = await RequestValidationService.validateDate(
+      request,
+      'baseMonth',
+      []
+    );
+
+    const targetMonth = await RequestValidationService.validateDate(
+      request,
+      'targetMonth',
+      []
+    );
+    return postingService.getFutureInstallments(user, baseMonth, targetMonth);
   }
 
   public async getSingle({ auth, params }: HttpContextContract) {
